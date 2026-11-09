@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Knowledge Assistant · Project 02 prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff; --surface:#f9fafb; --side:#f3f4f6; --card:#ffffff; --ink:#111827; --mute:#6b7280; --line:#e5e7eb;
+  --blue:#2563eb; --blue-ink:#ffffff; --blue-soft:#eff6ff;
+  --hi:#047857; --hi-bg:#ecfdf5; --md:#b45309; --md-bg:#fffbeb; --lo:#b91c1c; --lo-bg:#fef2f2;
+  --mark:#fef08a; --mark-ink:#111827;
+  color-scheme: light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1115; --surface:#14171c; --side:#171a20; --card:#1b1f26; --ink:#e7e9ee; --mute:#9aa3b2; --line:#2a2f38;
+  --blue:#5b8cff; --blue-ink:#0b1020; --blue-soft:#1a2440;
+  --hi:#4ade9a; --hi-bg:#123026; --md:#f5b14c; --md-bg:#33260f; --lo:#f87171; --lo-bg:#3a1717;
+  --mark:#5c4d0b; --mark-ink:#fff6cc; color-scheme: dark; } }
+:root[data-theme="dark"]{
+  --bg:#0f1115; --surface:#14171c; --side:#171a20; --card:#1b1f26; --ink:#e7e9ee; --mute:#9aa3b2; --line:#2a2f38;
+  --blue:#5b8cff; --blue-ink:#0b1020; --blue-soft:#1a2440;
+  --hi:#4ade9a; --hi-bg:#123026; --md:#f5b14c; --md-bg:#33260f; --lo:#f87171; --lo-bg:#3a1717;
+  --mark:#5c4d0b; --mark-ink:#fff6cc; color-scheme: dark; }
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+button{font:inherit;cursor:pointer}
+.app{display:flex;height:100%;min-height:0}
+.side{width:248px;flex:none;background:var(--side);padding:20px 14px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.brand{font-weight:700;font-size:15px;padding:0 4px}
+.brand small{display:block;font-weight:400;color:var(--mute);font-size:12px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:var(--blue-ink)}
+.btn:focus-visible,.chip:focus-visible,.recent:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.side .label{font-size:11px;font-weight:600;color:var(--mute);margin:8px 4px 0}
+.recent{display:block;width:100%;text-align:left;border:0;background:none;color:var(--ink);padding:8px 10px;border-radius:6px;font-size:13px}
+.recent:hover{background:var(--card)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--surface)}
+.head{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--line);background:var(--bg)}
+.head h1{font-size:14px;font-weight:600;margin:0}
+.head .note{margin-left:auto;font-size:12px;color:var(--mute)}
+.menu{display:none}
+.msgs{flex:1;overflow:auto;padding:28px 28px 12px;display:flex;flex-direction:column;gap:18px}
+.empty{max-width:640px;margin:6vh auto 0;display:flex;flex-direction:column;gap:14px}
+.empty h2{font-size:26px;line-height:1.25;margin:0}
+.empty p{margin:0;color:var(--mute)}
+.sugg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.sugg button{text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:12px 14px;font-size:14px}
+.sugg button span{display:block;font-size:12px;color:var(--mute);margin-top:4px}
+.sugg button:hover{border-color:var(--blue)}
+.user{align-self:flex-end;max-width:min(520px,85%);background:var(--blue);color:var(--blue-ink);padding:10px 14px;border-radius:12px}
+.card{max-width:680px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.badge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.High{color:var(--hi);background:var(--hi-bg)} .Medium{color:var(--md);background:var(--md-bg)} .Low{color:var(--lo);background:var(--lo-bg)}
+.notice{border-radius:8px;padding:10px 12px;background:var(--md-bg)}
+.notice b{color:var(--md);display:block;font-size:13px}
+.notice p{margin:2px 0 0;font-size:13px}
+.ans{margin:0;white-space:pre-wrap}
+.ttl{font-weight:600;font-size:16px;margin:0}
+.slabel{font-size:11px;font-weight:600;color:var(--mute);margin-top:2px}
+.chips{display:flex;flex-direction:column;gap:6px}
+.chip{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 10px;text-align:left;font-size:13px}
+.chip b{color:var(--blue);font-size:12px}
+.chip em{font-style:normal;color:var(--mute);font-size:12px}
+.chip:hover{border-color:var(--blue)}
+.acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fb{margin-left:auto;display:flex;gap:4px;align-items:center;color:var(--mute);font-size:13px}
+.fb button{border:1px solid transparent;background:none;border-radius:6px;padding:2px 6px;color:var(--mute)}
+.fb button[aria-pressed="true"]{border-color:var(--line);background:var(--surface);color:var(--ink)}
+details{font-size:13px;color:var(--mute)}
+details summary{cursor:pointer}
+details ul{margin:6px 0 0;padding-left:18px}
+.thinking{color:var(--mute);display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--blue);animation:p 1s infinite alternate}
+@keyframes p{to{opacity:.25}}
+@media (prefers-reduced-motion: reduce){.dot{animation:none}}
+.sent{border-left:4px solid var(--blue)}
+.comp{display:flex;gap:10px;padding:14px 28px 18px;border-top:1px solid var(--line);background:var(--bg)}
+.comp textarea{flex:1;resize:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 13px;font:inherit;height:46px}
+.comp textarea:focus{outline:2px solid var(--blue);outline-offset:-1px}
+.banner{margin:12px 28px 0;border-radius:8px;padding:10px 12px;font-size:13px;background:var(--md-bg);display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.banner.ok{background:var(--hi-bg)}
+.banner small{flex-basis:100%;color:var(--mute)}
+.keyrow{display:flex;gap:6px;flex:1;min-width:240px}
+.keyrow input{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 10px;font:inherit}
+.link{border:0;background:none;color:var(--blue);text-decoration:underline;padding:0}
+.panel{width:380px;flex:none;border-left:1px solid var(--line);background:var(--bg);display:none;flex-direction:column;min-height:0}
+.panel.open{display:flex}
+.phead{display:flex;align-items:flex-start;gap:8px;padding:18px 20px 12px;border-bottom:1px solid var(--line)}
+.phead h2{font-size:17px;margin:0;line-height:1.3}
+.phead .meta{font-size:12px;color:var(--mute);margin-top:4px}
+.phead .x{margin-left:auto;border:0;background:none;color:var(--mute);font-size:20px;line-height:1}
+.pbody{overflow:auto;padding:14px 20px 24px;font-size:14px}
+.pbody p{margin:0 0 8px}
+mark{background:var(--mark);color:var(--mark-ink);border-radius:3px;padding:0 2px}
+.arch{display:inline-block;margin-top:6px;font-size:12px;font-weight:600;color:var(--md)}
+@media (max-width: 900px){
+  .side{display:none} .side.open{display:flex;position:fixed;inset:0 auto 0 0;z-index:20;padding-top:calc(20px + env(safe-area-inset-top,0px));box-shadow:0 0 0 100vw rgba(0,0,0,.35)}
+  .menu{display:inline-block}
+  .head .note{display:none}
+  .panel.open{position:fixed;inset:0;width:auto;z-index:30;padding-top:env(safe-area-inset-top,0px)}
+  .sugg{grid-template-columns:1fr}
+  .msgs,.comp{padding-left:16px;padding-right:16px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="side" id="side" aria-label="Conversation history">
+    <div class="brand">Knowledge Assistant<small>Delivery knowledge · Canada</small></div>
+    <button class="btn primary" id="newq">+ New question</button>
+    <div class="label">Recent</div>
+    <div id="recent"></div>
+  </nav>
+  <main class="main">
+    <div class="head">
+      <button class="btn menu" id="menu" aria-label="Open history">☰</button>
+      <h1>Ask about policies, templates or past projects</h1>
+      <span class="note">Answers come only from 30 approved documents · <a href="../" target="_top" style="color:var(--blue)">Case study</a></span>
+    </div>
+    <div id="banner"></div>
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+    <form class="comp" id="form">
+      <textarea id="q" rows="1" placeholder="Ask a question…" aria-label="Your question"></textarea>
+      <button class="btn primary" type="submit">Ask</button>
+    </form>
+  </main>
+  <aside class="panel" id="panel" aria-label="Source document"></aside>
+</div>
+<script>
+const DOCS = [{"id": "B01", "title": "Discovery Phase Playbook", "type": "Playbook", "owner": "Delivery Excellence, Canada", "updated": "2026-02-05", "status": "Current", "body": "## Duration\nTypically 3–6 weeks.\n\n## Activities\n1. Stakeholder interviews (8–15 people across business and IT).\n2. Current-state process mapping.\n3. Pain point and opportunity prioritisation.\n4. Target-state options with high-level estimates.\n5. Discovery readout to the client sponsor.\n\n## Outputs\nDiscovery readout (use template T01), prioritised backlog, high-level roadmap and estimate."}, {"id": "B02", "title": "Project Kickoff Checklist", "type": "Playbook", "owner": "Delivery Excellence, Canada", "updated": "2025-12-10", "status": "Current", "body": "- [ ] SOW signed and stored in the legal folder\n- [ ] Client NDAs signed by all team members\n- [ ] RAID log created (template T05)\n- [ ] Status reporting cadence agreed (see B03)\n- [ ] Attendance pattern agreed (see P07)\n- [ ] Access requests submitted for client systems\n- [ ] Kickoff deck reviewed with the account delivery lead"}, {"id": "B03", "title": "Status Reporting Standard", "type": "Playbook", "owner": "Delivery Excellence, Canada", "updated": "2026-01-15", "status": "Current", "body": "- Send a weekly status report every Friday using template T04.\n- Use RAG status for scope, schedule, budget and quality.\n- Amber: at risk but recoverable within the current phase. Red: needs client or leadership decision.\n- Any Red status is escalated to the account delivery lead on the same day."}, {"id": "B04", "title": "Risk and Issue Management", "type": "Playbook", "owner": "Delivery Excellence, Canada", "updated": "2025-10-28", "status": "Current", "body": "- Log every risk and issue in the RAID log (T05) within 1 business day of identification.\n- Score risks on likelihood and impact (1–5 each). Risks scoring 15 or more are reviewed weekly with the client.\n- Every risk needs an owner and a mitigation date.\n- Close issues only when the client confirms resolution."}, {"id": "B05", "title": "Estimation Guidelines", "type": "Playbook", "owner": "Delivery Excellence", "updated": "2024-03-12", "status": "Current", "body": "- Estimate with three points (optimistic, likely, pessimistic) for every work package.\n- Add 15% contingency for fixed-price work and 10% for time-and-materials work.\n- Have a second architect review any estimate above 2,000 person-hours."}, {"id": "B06", "title": "Handover to Support", "type": "Playbook", "owner": "Application Services", "updated": "2024-06-20", "status": "Current", "body": "- Start handover planning 6 weeks before go-live.\n- Provide runbooks, architecture diagrams and known-issue lists to the support team.\n- Standard warranty (hypercare) period after go-live: 30 days, unless the SOW states otherwise.\n- Support team signs the handover acceptance form before the project team rolls off."}, {"id": "B07", "title": "French-Language Deliverables for Québec Clients", "type": "Playbook", "owner": "Delivery Excellence, Canada", "updated": "2026-03-20", "status": "Current", "body": "- Under Québec's Charter of the French Language, as amended by Bill 96, client-facing deliverables and software interfaces for Québec clients must be available in French.\n- Plan translation time in the schedule: allow 5 business days per major deliverable.\n- Use approved translation vendors; do not rely on unreviewed machine translation for final deliverables.\n- Confirm language requirements with the client at kickoff."}, {"id": "B08", "title": "Accessibility Standards for Client Deliverables", "type": "Playbook", "owner": "Experience Design, Canada", "updated": "2026-05-08", "status": "Current", "body": "- Digital products built for Ontario clients must meet AODA requirements, which reference WCAG 2.0 AA. Our standard is WCAG 2.1 AA for all Canadian clients.\n- Run automated and manual accessibility testing before user acceptance testing.\n- Accessibility defects of high severity block go-live."}, {"id": "C01", "title": "Case Summary: Digital Account Opening for a Canadian Bank", "type": "Case summary", "owner": "Banking & Financial Services, Canada", "updated": "2025-12-02", "status": "Current", "body": "- Problem: account opening took 45 minutes in branch; online drop-off was 60%.\n- Solution: mobile-first onboarding with digital identity verification.\n- Result: online completion rose from 40% to 71% in 6 months.\n- Lesson: involve compliance from week 1; late KYC changes cost 3 weeks."}, {"id": "C02", "title": "Case Summary: Claims Automation for a Canadian Insurer", "type": "Case summary", "owner": "Insurance, Canada", "updated": "2026-03-11", "status": "Current", "body": "- Problem: simple auto claims took 9 days on average.\n- Solution: rules-based triage plus document extraction with human review for low-confidence cases.\n- Result: straight-through processing for 35% of simple claims; average cycle time down to 4 days.\n- Lesson: set confidence thresholds with the claims team, not just the data science team."}, {"id": "C03", "title": "Case Summary: Permitting Portal for an Ontario Municipality", "type": "Case summary", "owner": "Public Sector, Canada", "updated": "2025-11-20", "status": "Current", "body": "- Problem: paper-based building permits with 12-week turnaround.\n- Solution: online permit portal, bilingual (English and French), meeting AODA and WCAG 2.1 AA.\n- Result: 70% of applications submitted online in year one; turnaround down to 6 weeks.\n- Lesson: accessibility testing with real assistive-technology users found issues that automated tools missed."}, {"id": "C04", "title": "Case Summary: Billing Platform Migration for a Telecom Provider", "type": "Case summary", "owner": "Communications, Canada", "updated": "2023-08-14", "status": "Current", "body": "- Problem: legacy billing system end-of-life.\n- Approach: phased cutover by customer segment over 4 waves, with 2 weeks of parallel billing runs before each wave.\n- Result: migration finished with under 0.1% billing disputes.\n- Lesson: parallel runs caught 14 rating defects before customers saw them."}, {"id": "C05", "title": "Case Summary: Loyalty Platform for a National Retailer", "type": "Case summary", "owner": "Retail, Canada", "updated": "2026-01-28", "status": "Current", "body": "- Problem: three separate loyalty programs after acquisitions.\n- Solution: unified loyalty platform with a single member ID.\n- Result: 2.1 million members migrated; active members up 18% in a year.\n- Lesson: Québec launch needed French content ready 3 weeks earlier than planned."}, {"id": "C06", "title": "Case Summary: Data Platform Migration to a Canadian Cloud Region", "type": "Case summary", "owner": "Banking & Financial Services, Canada", "updated": "2026-05-19", "status": "Current", "body": "- Problem: analytics platform hosted outside Canada conflicted with the client's new residency rules.\n- Solution: migrated to a cloud region in Canada with masked data in non-production.\n- Result: completed in 7 months with no residency findings in the client's audit.\n- Lesson: confirm residency terms in the SOW before architecture work begins."}, {"id": "P01", "title": "Client Data Residency and Handling Policy", "type": "Policy", "owner": "Delivery Risk & Compliance, Canada", "updated": "2026-04-15", "status": "Current", "body": "## Purpose\nSets where client data may be stored and processed on Canadian engagements.\n\n## Rules\n- Personal information of Canadian client end-users must be stored and processed in Canadian data centres (Canada Central or Canada East regions) unless the client signs a written residency exception.\n- Non-production environments may use masked or synthetic data only. Real personal information in dev or test is not allowed.\n- Cross-border access for support (for example, offshore teams) requires the client's written approval and is logged.\n- Data residency commitments in a Statement of Work override this policy if they are stricter.\n\n## Approvals\nResidency exceptions are approved by the Delivery Risk & Compliance lead and recorded in the engagement's RAID log.\n\n## Alignment\nThis policy follows PIPEDA principles and applicable provincial privacy laws, including Québec's Law 25."}, {"id": "P02", "title": "Client Data Storage Guidelines", "type": "Policy", "owner": "IT Operations", "updated": "2023-02-10", "status": "Current", "body": "## Purpose\nGuidance on where project data may be stored.\n\n## Guidelines\n- Client data may be stored in any approved Cognizant cloud region in North America, including US regions, to optimise cost.\n- Test environments may use copies of production data if access is restricted to the project team.\n- Offshore teams may access client data once they complete security training.\n\n## Questions\nContact IT Operations through the service desk."}, {"id": "P03", "title": "Travel and Expense Policy: Client Site Work", "type": "Policy", "owner": "Finance, Canada", "updated": "2026-01-20", "status": "Current", "body": "## Summary\nCovers travel to client sites within Canada.\n\n- Book flights and hotels through the corporate travel portal at least 7 days ahead.\n- Hotel cap: $250 CAD per night in Toronto, Montréal and Vancouver; $190 CAD elsewhere.\n- Meal per diem: $75 CAD per full travel day.\n- Mileage for personal vehicle use: $0.70 per km.\n- Submit expenses within 30 days with itemised receipts.\n- Billable travel must be pre-approved by the delivery manager and match the client's SOW travel terms."}, {"id": "P04", "title": "Staffing Request Process", "type": "Process", "owner": "Resource Management Group, Canada", "updated": "2026-03-02", "status": "Current", "body": "## When to raise a request\nRaise a staffing request as soon as a role is confirmed in an SOW or change request.\n\n## Steps\n1. Delivery manager submits the request in the resourcing tool with role, skills, start date, location and billing rate.\n2. Resource Management Group proposes bench candidates within 5 business days.\n3. If no bench match exists, the request goes to internal mobility and then external hiring.\n4. Client interviews, if required, are scheduled by the delivery manager.\n\n## Lead times\nStandard roles: 2–3 weeks. Niche skills (for example, mainframe or Québec French-language roles): 4–6 weeks."}, {"id": "P05", "title": "Client Confidentiality and NDA Handling", "type": "Policy", "owner": "Legal, Canada", "updated": "2025-11-05", "status": "Current", "body": "- Every team member signs the client-specific NDA before accessing client systems or documents.\n- Signed NDAs are stored in the engagement's legal folder, not on personal drives.\n- Client names may not be used in internal case studies without written client consent. Use anonymised labels such as \"a Canadian bank\".\n- Report a suspected confidentiality breach to Legal within 24 hours."}, {"id": "P06", "title": "Use of Generative AI Tools on Client Work", "type": "Policy", "owner": "Office of AI Governance", "updated": "2026-06-01", "status": "Current", "body": "## Approved tools\nOnly enterprise-approved AI tools listed on the AI Governance intranet page may be used for client work.\n\n## Rules\n- Never paste client confidential data or personal information into public AI tools.\n- AI-generated content in client deliverables must be reviewed by a person before it is sent.\n- Disclose AI assistance to the client when the SOW or client policy requires it.\n- Log new AI use cases with the Office of AI Governance before a pilot starts."}, {"id": "P07", "title": "Hybrid Work and Client Site Attendance", "type": "Policy", "owner": "People Team, Canada", "updated": "2025-12-01", "status": "Current", "body": "- Default: 3 days a week in the office or at the client site.\n- Client site attendance follows the client's requirements and overrides the default.\n- Delivery managers agree team attendance patterns at project kickoff and record them in the project plan."}, {"id": "P08", "title": "Change Request Process", "type": "Process", "owner": "Delivery Excellence, Canada", "updated": "2025-11-18", "status": "Current", "body": "## When a change request is needed\nAny change to scope, timeline, cost or key personnel after the SOW is signed.\n\n## Steps\n1. Delivery manager drafts the change request with impact on scope, schedule, cost and risk.\n2. Internal review: changes under $50,000 CAD are approved by the account delivery lead. Changes of $50,000 CAD or more also need the regional delivery head.\n3. Client signs the change request before work begins.\n4. Update the project plan, RAID log and billing schedule within 2 business days."}, {"id": "P09", "title": "Change Request Procedure", "type": "Process", "owner": "Delivery Excellence", "updated": "2022-05-09", "status": "Archived", "body": "## Standard changes\nChanges under $25,000 CAD are approved by the delivery manager. Larger changes need the account delivery lead.\n\n## Emergency changes\nFor urgent production fixes, the delivery manager may start work on verbal client approval. A written change request must be signed by the client within 5 business days."}, {"id": "P10", "title": "Security Incident Reporting", "type": "Policy", "owner": "Information Security, Canada", "updated": "2026-02-14", "status": "Current", "body": "- Report any suspected security incident to the Security Operations Centre immediately through the incident hotline or the security portal.\n- Do not try to investigate or contain the incident yourself unless instructed.\n- The delivery manager notifies the client according to the SOW's incident terms, after confirming with Information Security.\n- Incidents involving personal information are assessed for breach reporting under PIPEDA."}, {"id": "T01", "title": "Discovery Readout Template v3", "type": "Template guide", "owner": "Delivery Excellence, Canada", "updated": "2026-02-05", "status": "Current", "body": "## Required sections\n1. Executive summary (one slide)\n2. What we heard: themes from interviews\n3. Current-state journey and pain points\n4. Target-state options with pros and cons\n5. Recommended roadmap and high-level estimate\n6. Risks, assumptions and next steps\n\nKeep the main deck to 20 slides or fewer. Put detail in an appendix."}, {"id": "T02", "title": "Discovery Readout Template v2", "type": "Template guide", "owner": "Delivery Excellence", "updated": "2023-04-17", "status": "Archived", "body": "## Sections\n1. Background\n2. Findings\n3. Recommendations\n4. Next steps\n\n## Appendix: executive one-pager\nInclude a one-page summary for the client sponsor with the top 3 findings, the recommended option and the investment range."}, {"id": "T03", "title": "Statement of Work Guide", "type": "Template guide", "owner": "Legal and Delivery Excellence, Canada", "updated": "2025-11-30", "status": "Current", "body": "Every SOW must include: scope and out-of-scope items, deliverables and acceptance criteria, timeline and milestones, commercial model (fixed price or time and materials), roles and responsibilities, data residency terms, assumptions and dependencies, and the change request process (see P08)."}, {"id": "T04", "title": "Weekly Status Report Template", "type": "Template guide", "owner": "Delivery Excellence, Canada", "updated": "2026-01-15", "status": "Current", "body": "Sections: overall RAG status; accomplishments this week; plan for next week; top risks and issues (from the RAID log); decisions needed from the client; budget burn against plan."}, {"id": "T05", "title": "RAID Log Template", "type": "Template guide", "owner": "Delivery Excellence, Canada", "updated": "2025-10-28", "status": "Current", "body": "Columns: ID, type (Risk, Assumption, Issue, Dependency), description, owner, likelihood (1–5), impact (1–5), score, mitigation, due date, status."}, {"id": "T06", "title": "Lessons Learned Template", "type": "Template guide", "owner": "Delivery Excellence, Canada", "updated": "2025-12-15", "status": "Current", "body": "Run a lessons-learned session within 2 weeks of project close. Capture what went well, what didn't, root causes, and recommendations. Store the output in the knowledge base with an anonymised client label."}];
+const BY_ID = Object.fromEntries(DOCS.map(d=>[d.id,d]));
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const fmt = u=>{const [y,m]=u.split("-");return MONTHS[+m-1]+" "+y};
+function monthsOld(u){const d=new Date(u+"T00:00:00"),t=new Date();return (t.getFullYear()-d.getFullYear())*12+(t.getMonth()-d.getMonth());}
+const isWeak = d=>d.status==="Archived"||monthsOld(d.updated)>12;
+
+// ---------- Retrieval (BM25 over the 30 documents) ----------
+const STOP=new Set("goes go get need use know find tell does give a an the of to for in on and or is are be do does did i we our my you your it its this that what which who how when where can should with from at by as about any much many there their they them me us".split(" "));
+const stem=w=>w.length<5?w.replace(/s$/,""):w.replace(/(ies)$/,"y").replace(/(ing|ed|es|e|s)$/,"");
+const tok=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").match(/[a-z0-9$]+/g)?.filter(w=>!STOP.has(w)&&w.length>1).map(stem) || [];
+const IDX=DOCS.map(d=>{const t=tok(d.title+" "+d.title+" "+d.body);const tf={};t.forEach(w=>tf[w]=(tf[w]||0)+1);return {d,tf,len:t.length}});
+const AVG=IDX.reduce((a,x)=>a+x.len,0)/IDX.length;
+const DF={};IDX.forEach(x=>Object.keys(x.tf).forEach(w=>DF[w]=(DF[w]||0)+1));
+function retrieve(q,k=5){
+  const qs=[...new Set(tok(q))];
+  return IDX.map(x=>{let s=0;for(const w of qs){const f=x.tf[w];if(!f)continue;const idf=Math.log(1+(IDX.length-DF[w]+.5)/(DF[w]+.5));s+=idf*f*2.2/(f+1.2*(.25+.75*x.len/AVG));}return {d:x.d,s}})
+    .filter(r=>r.s>0).sort((a,b)=>b.s-a.s).slice(0,k).map(r=>r.d);
+}
+
+// ---------- Tier rules (same as assistant.py) ----------
+function scoreTier(r,cited){
+  if(r.sources_conflict) return ["Low","Sources disagree, so an expert should confirm."];
+  if(r.legal_or_regulatory) return ["Low","Legal or regulatory question, so an expert should confirm."];
+  if(!r.answerable||!r.answer) return ["Low","No reliable answer in the knowledge base."];
+  if(!cited.length) return ["Low","The answer had no citations, so it was withheld."];
+  const weak=cited.filter(isWeak);
+  if(weak.length) return ["Medium","Relies on an old or archived source ("+weak.map(d=>d.id).join(", ")+")."];
+  return ["High","Answered from current sources."];
+}
+const LABEL={High:"High confidence",Medium:"Check before using",Low:"Needs an expert"};
+
+function prompt(q,docs){
+  const ctx=docs.map(d=>`<document id="${d.id}" title="${d.title}" status="${d.status}" last_updated="${d.updated}">\n${d.body}\n</document>`).join("\n\n");
+  return `You are an internal knowledge assistant for consultants and delivery managers at a professional services firm in Canada.
+Answer ONLY from the documents below. Never use outside knowledge. If they don't clearly answer the question, say so.
+Documents with status "Archived" are older versions; prefer a Current document when both cover the same rule.
+
+${ctx}
+
+Question: ${q}
+
+Respond with JSON only, no prose, in exactly this shape:
+{"answer": string (under 70 words, plain language, "" if not answered),
+ "answerable": boolean (true only if the documents clearly answer it),
+ "sources_conflict": boolean (true if two non-archived documents give different rules for the same thing),
+ "legal_or_regulatory": boolean (true if about privacy law, data residency, contractual commitments or regulatory compliance),
+ "citations": [{"doc_id": string, "quote": string (a short phrase copied EXACTLY from that document that supports the answer)}],
+ "reason": string (one short sentence)}`;
+}
+
+// ---------- State & rendering ----------
+const state={msgs:[],recent:[]};
+let GEMINI_KEY="";
+const MODEL="gemini-3.8-flash";
+async function callGemini(text){
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,{
+    method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":GEMINI_KEY},
+    body:JSON.stringify({contents:[{role:"user",parts:[{text}]}],generationConfig:{responseMimeType:"application/json",temperature:0.1}})});
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw {code:res.status===429?"rate_limited":res.status===400||res.status===403?"bad_key":"http_"+res.status,message:e?.error?.message};}
+  const j=await res.json();
+  const t=j?.candidates?.[0]?.content?.parts?.map(p=>p.text||"").join("")||"{}";
+  return JSON.parse(t.replace(/```json|```/g,"").trim());
+}
+// ---------- Built-in answer engine (works with no API) ----------
+const BANK = [{"q": "What's the hotel limit per night for a client trip to Toronto?", "answer": "The hotel cap is $250 CAD per night in Toronto, Montréal and Vancouver, and $190 CAD elsewhere. Book through the corporate travel portal at least 7 days ahead.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P03", "quote": "Hotel cap: $250 CAD per night in Toronto, Montréal and Vancouver; $190 CAD elsewhere."}], "reason": "Built-in answer bank."}, {"q": "What sections should a discovery readout include?", "answer": "Six sections: executive summary (one slide), what we heard, current-state journey and pain points, target-state options, recommended roadmap and estimate, and risks and next steps. Keep the main deck to 20 slides or fewer.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "T01", "quote": "Keep the main deck to 20 slides or fewer."}], "reason": "Built-in answer bank."}, {"q": "How long does it take to staff a niche-skill role?", "answer": "Niche skills, such as mainframe or Québec French-language roles, take 4–6 weeks to staff. Standard roles take 2–3 weeks.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P04", "quote": "Niche skills (for example, mainframe or Québec French-language roles): 4–6 weeks."}], "reason": "Built-in answer bank."}, {"q": "Who needs to approve an $80,000 change request?", "answer": "Changes of $50,000 CAD or more need the account delivery lead and the regional delivery head. The client must sign before work begins.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P08", "quote": "Changes of $50,000 CAD or more also need the regional delivery head."}], "reason": "Built-in answer bank."}, {"q": "What do I do if my project status turns Red?", "answer": "Escalate it to the account delivery lead the same day. Red means the project needs a client or leadership decision.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "B03", "quote": "Any Red status is escalated to the account delivery lead on the same day."}], "reason": "Built-in answer bank."}, {"q": "Can I use ChatGPT or a public AI chatbot with client notes?", "answer": "No. Use only enterprise-approved AI tools, and never paste client confidential data or personal information into public AI tools.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P06", "quote": "Never paste client confidential data or personal information into public AI tools."}], "reason": "Built-in answer bank."}, {"q": "How much time should I plan for French translation for a Québec client?", "answer": "Plan 5 business days per major deliverable, and use approved translation vendors rather than unreviewed machine translation.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "B07", "quote": "allow 5 business days per major deliverable"}], "reason": "Built-in answer bank."}, {"q": "What accessibility standard do our deliverables need to meet?", "answer": "WCAG 2.1 AA for all Canadian clients. Ontario's AODA references WCAG 2.0 AA, so our standard goes further.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "B08", "quote": "Our standard is WCAG 2.1 AA for all Canadian clients."}], "reason": "Built-in answer bank."}, {"q": "What columns go in a RAID log?", "answer": "ID, type (risk, assumption, issue or dependency), description, owner, likelihood, impact, score, mitigation, due date and status.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "T05", "quote": "Columns: ID, type (Risk, Assumption, Issue, Dependency)"}], "reason": "Built-in answer bank."}, {"q": "Which risks do we review weekly with the client?", "answer": "Risks scoring 15 or more (likelihood × impact, each rated 1–5) are reviewed weekly with the client.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "B04", "quote": "Risks scoring 15 or more are reviewed weekly with the client."}], "reason": "Built-in answer bank."}, {"q": "Have we done claims automation for an insurer before?", "answer": "Yes. For a Canadian insurer, we automated 35% of simple claims end to end and cut average cycle time from 9 days to 4.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "C02", "quote": "straight-through processing for 35% of simple claims; average cycle time down to 4 days."}], "reason": "Built-in answer bank."}, {"q": "Do we have a precedent for a bilingual, accessible public-sector portal?", "answer": "Yes. An Ontario municipality's bilingual permitting portal met AODA and WCAG 2.1 AA; 70% of applications moved online and turnaround fell from 12 to 6 weeks.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "C03", "quote": "Solution: online permit portal, bilingual (English and French), meeting AODA and WCAG 2.1 AA."}], "reason": "Built-in answer bank."}, {"q": "What do I need to have in place before project kickoff?", "answer": "A signed SOW, client NDAs for everyone, a RAID log, an agreed status cadence and attendance pattern, access requests submitted, and the kickoff deck reviewed with the account delivery lead.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "B02", "quote": "SOW signed and stored in the legal folder"}], "reason": "Built-in answer bank."}, {"q": "How long does a discovery phase usually take?", "answer": "Typically 3–6 weeks, ending with a discovery readout to the client sponsor.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "B01", "quote": "Typically 3–6 weeks."}], "reason": "Built-in answer bank."}, {"q": "What should I do if I suspect a security incident?", "answer": "Report it to the Security Operations Centre immediately through the incident hotline or security portal. Don't investigate it yourself unless instructed.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P10", "quote": "Report any suspected security incident to the Security Operations Centre immediately"}], "reason": "Built-in answer bank."}, {"q": "Can I start an urgent production fix before the change request is signed?", "answer": "Only the archived 2022 procedure covers this: start on verbal client approval, then get a written change request signed within 5 business days.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P09", "quote": "the delivery manager may start work on verbal client approval"}], "reason": "Built-in answer bank."}, {"q": "How much contingency should I add to a fixed-price estimate?", "answer": "Add 15% contingency for fixed-price work and 10% for time-and-materials work.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "B05", "quote": "Add 15% contingency for fixed-price work and 10% for time-and-materials work."}], "reason": "Built-in answer bank."}, {"q": "Should the discovery readout include an executive one-pager?", "answer": "The archived v2 template asked for a one-page sponsor summary. The current v3 template uses a one-slide executive summary instead.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "T02", "quote": "Include a one-page summary for the client sponsor"}], "reason": "Built-in answer bank."}, {"q": "How did we handle cutover on a past billing migration?", "answer": "For a telecom billing migration, we cut over in 4 waves by customer segment, with 2 weeks of parallel billing before each wave.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "C04", "quote": "phased cutover by customer segment over 4 waves"}], "reason": "Built-in answer bank."}, {"q": "How long is the hypercare period after go-live?", "answer": "30 days after go-live, unless the SOW says otherwise.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "B06", "quote": "Standard warranty (hypercare) period after go-live: 30 days"}], "reason": "Built-in answer bank."}, {"q": "Can we store a bank client's customer data in a US cloud region?", "answer": "", "answerable": true, "sources_conflict": true, "legal_or_regulatory": true, "citations": [{"doc_id": "P01", "quote": "must be stored and processed in Canadian data centres"}, {"doc_id": "P02", "quote": "including US regions"}], "reason": "Built-in answer bank."}, {"q": "What's the parental leave policy?", "answer": "", "answerable": false, "sources_conflict": false, "legal_or_regulatory": false, "citations": [], "reason": "Built-in answer bank."}, {"q": "What's our billing rate for a senior consultant on the banking account?", "answer": "", "answerable": false, "sources_conflict": false, "legal_or_regulatory": false, "citations": [], "reason": "Built-in answer bank."}, {"q": "How do I book a meeting room in the Toronto office?", "answer": "", "answerable": false, "sources_conflict": false, "legal_or_regulatory": false, "citations": [], "reason": "Built-in answer bank."}, {"q": "Can our offshore team access production data for an Ontario client?", "answer": "", "answerable": true, "sources_conflict": true, "legal_or_regulatory": true, "citations": [{"doc_id": "P01", "quote": "Cross-border access for support (for example, offshore teams) requires the client's written approval"}, {"doc_id": "P02", "quote": "Offshore teams may access client data once they complete security training."}], "reason": "Built-in answer bank."}, {"q": "What's the meal per diem when travelling?", "answer": "$75 CAD per full travel day.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P03", "quote": "Meal per diem: $75 CAD per full travel day."}], "reason": "Built-in answer bank."}, {"q": "When is the weekly status report due?", "answer": "Every Friday, using the weekly status report template.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "B03", "quote": "Send a weekly status report every Friday using template T04."}], "reason": "Built-in answer bank."}, {"q": "What's the mileage rate for using my own car?", "answer": "$0.70 per km for personal vehicle use. Submit expenses within 30 days with itemised receipts.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P03", "quote": "Mileage for personal vehicle use: $0.70 per km."}], "reason": "Built-in answer bank."}, {"q": "What's the hybrid work policy?", "answer": "The default is 3 days a week in the office or at the client site. Client site requirements override the default, and attendance is agreed at kickoff.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P07", "quote": "Default: 3 days a week in the office or at the client site."}], "reason": "Built-in answer bank."}, {"q": "What must a statement of work (SOW) include?", "answer": "Scope and out-of-scope items, deliverables and acceptance criteria, timeline, commercial model, roles, data residency terms, assumptions and the change request process.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "T03", "quote": "Every SOW must include: scope and out-of-scope items"}], "reason": "Built-in answer bank."}, {"q": "Who approves a change request under $50,000?", "answer": "The account delivery lead approves changes under $50,000 CAD. The client signs before work begins.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P08", "quote": "changes under $50,000 CAD are approved by the account delivery lead"}], "reason": "Built-in answer bank."}, {"q": "How long does it take to staff a standard role?", "answer": "2–3 weeks for standard roles. Resource Management proposes bench candidates within 5 business days.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P04", "quote": "Standard roles: 2–3 weeks."}], "reason": "Built-in answer bank."}, {"q": "What were the results of the loyalty platform project?", "answer": "2.1 million members migrated to one platform, and active members rose 18% in a year.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "C05", "quote": "2.1 million members migrated; active members up 18% in a year."}], "reason": "Built-in answer bank."}, {"q": "When should we run a lessons-learned session?", "answer": "Within 2 weeks of project close. Store the output in the knowledge base with an anonymised client label.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "T06", "quote": "Run a lessons-learned session within 2 weeks of project close."}], "reason": "Built-in answer bank."}, {"q": "When do expense claims need to be submitted?", "answer": "Within 30 days, with itemised receipts.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P03", "quote": "Submit expenses within 30 days with itemised receipts."}], "reason": "Built-in answer bank."}, {"q": "Do I need to sign an NDA before accessing client systems?", "answer": "Yes. Every team member signs the client-specific NDA before accessing client systems or documents.", "answerable": true, "sources_conflict": false, "legal_or_regulatory": false, "citations": [{"doc_id": "P05", "quote": "Every team member signs the client-specific NDA before accessing client systems or documents."}], "reason": "Built-in answer bank."}];
+const BANK_T = BANK.map(x=>new Set(tok(x.q)));
+function matchBank(q){
+  const qs=new Set(tok(q)); if(!qs.size) return null;
+  let best=null,bs=0;
+  const nums=q.match(/\d+/g)||[];
+  BANK.forEach((x,i)=>{const t=BANK_T[i]; const bn=x.q.match(/\d+/g)||[]; if(nums.length&&bn.length&&!nums.some(n=>bn.includes(n)))return;let n=0;qs.forEach(w=>{if(t.has(w))n++});
+    const sc=0.6*n/qs.size+0.4*n/t.size; if(n>=Math.min(2,qs.size)&&sc>bs){bs=sc;best=x}});
+  return bs>=0.55?best:null;
+}
+const LEGAL=/(data residen|residency|privacy|pipeda|law 25|personal information|personal data|customer data|client data|us region|cloud region|offshore|contractual|commitment|legal|regulat|complian|lawsuit)/i;
+function clean(l){return l.replace(/^#+\s*/,"").replace(/^- \[ \] /,"").replace(/^- /,"").replace(/^\d+\.\s*/,"").trim()}
+function extractive(q,searched){
+  const qs=new Set(tok(q)); const legal=LEGAL.test(q);
+  const ids=searched.slice(0,3).map(d=>d.id);
+  if(legal){
+    const rel=searched.filter(d=>["P01","P02","P05","P06","P10"].includes(d.id)).slice(0,2);
+    const c=(rel.length?rel:searched.slice(0,1)).map(d=>({doc_id:d.id,quote:""}));
+    const conflict=c.some(x=>x.doc_id==="P01")&&c.some(x=>x.doc_id==="P02");
+    return {answer:"",answerable:true,sources_conflict:conflict,legal_or_regulatory:true,citations:c,reason:conflict?"P01 and P02 give different rules on client data.":"This touches on legal or regulatory obligations."};
+  }
+  const idf=w=>DF[w]?Math.log(1+(IDX.length-DF[w]+.5)/(DF[w]+.5)):0;
+  let best=null;
+  for(const d of searched.slice(0,5)){
+    const tt=new Set(tok(d.title));
+    for(const raw of d.body.split("\n")){ if(/^#/.test(raw.trim()))continue; const l=clean(raw); if(l.length<15)continue;
+      const lt=new Set(tok(l)); let sc=0,n=0; qs.forEach(w=>{if(lt.has(w)){sc+=idf(w);n++}else if(tt.has(w)){sc+=idf(w)}});
+      if(n&&(!best||sc>best.sc)) best={d,l,sc};}
+  }
+  if(!best||best.sc<2.2) return {answer:"",answerable:false,sources_conflict:false,legal_or_regulatory:legal,citations:[],reason:"No line in the top documents matched the question closely enough."};
+  return {answer:best.l,answerable:true,sources_conflict:false,legal_or_regulatory:legal,citations:[{doc_id:best.d.id,quote:best.l}],reason:"Best-matching line from "+best.d.id+"."};
+}
+function keyBanner(){ $("#banner").innerHTML=""; }
+
+function render(){
+  const m=$("#msgs");
+  if(!state.msgs.length){
+    m.innerHTML=`<div class="empty"><h2>Ask a question. Get a cited answer, or a clean handoff to an expert.</h2>
+    <p>This prototype searches 30 sample Cognizant Canada documents: policies, playbooks, templates and case summaries. Some are deliberately outdated or conflicting.</p>
+    <div class="sugg">
+      ${[["What's the hotel limit per night for a client trip to Toronto?","Current source"],
+         ["How much contingency should I add to a fixed-price estimate?","Source is over a year old"],
+         ["Can we store a bank client's customer data in a US cloud region?","Conflicting sources"],
+         ["What's the parental leave policy?","Not in the knowledge base"]]
+        .map(([q,h])=>`<button data-q="${esc(q)}">${esc(q)}<span>${h}</span></button>`).join("")}
+    </div></div>`;
+    m.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>ask(b.dataset.q));
+    return;
+  }
+  m.innerHTML=state.msgs.map((x,i)=>x.role==="user"?`<div class="user">${esc(x.text)}</div>`:card(x,i)).join("");
+  m.querySelectorAll("[data-doc]").forEach(b=>b.onclick=()=>openDoc(b.dataset.doc,b.dataset.quote));
+  m.querySelectorAll("[data-send]").forEach(b=>b.onclick=()=>{state.msgs[+b.dataset.send].sent=true;render();});
+  m.querySelectorAll("[data-fb]").forEach(b=>b.onclick=()=>{const [i,v]=b.dataset.fb.split(":");const x=state.msgs[+i];x.fb=x.fb===v?null:v;render();});
+  m.scrollTop=m.scrollHeight;
+  $("#recent").innerHTML=state.recent.map(q=>`<button class="recent" data-r="${esc(q)}">${esc(q)}</button>`).join("");
+  $("#recent").querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{$("#side").classList.remove("open");ask(b.dataset.r)});
+}
+function chip(d,quote,extra){
+  return `<button class="chip" data-doc="${d.id}" data-quote="${esc(quote||"")}"><b>${d.id}</b>${esc(d.title)}<em>Updated ${fmt(d.updated)}${d.status==="Archived"?" · Archived":monthsOld(d.updated)>12?" · over 12 months old":""}${extra||""}</em></button>`;
+}
+function team(x){
+  if(x.flags?.legal_or_regulatory) return "Delivery Risk & Compliance";
+  const top=x.searched?.[0]; return top? top.owner.replace(/, Canada$/,"") : "the Knowledge team";
+}
+function card(x,i){
+  if(x.pending) return `<div class="card"><div class="thinking"><span class="dot"></span>${esc(x.pending)}</div></div>`;
+  if(x.error) return `<div class="card"><span class="badge Low">${LABEL.Low}</span><p class="ttl">The assistant couldn't answer right now</p><p class="ans">${esc(x.error)}</p></div>`;
+  const fb=`<span class="fb">Helpful? <button aria-pressed="${x.fb==="up"}" data-fb="${i}:up" aria-label="Helpful">👍</button><button aria-pressed="${x.fb==="down"}" data-fb="${i}:down" aria-label="Not helpful">👎</button></span>`;
+  const why=`<details><summary>Why this rating?</summary><ul><li>${esc(x.why)}</li><li>Model: ${esc(x.flags?.reason||"")}</li><li>Searched ${x.searched.length} documents: ${x.searched.map(d=>d.id).join(", ")||"none matched"}</li></ul></details>`;
+  if(x.sent) return `<div class="card sent"><span class="badge Low">${LABEL.Low}</span><p class="ttl">Sent to ${esc(team(x))}</p>
+    <p class="ans">Your question and the ${x.searched.length} documents I searched were shared with the team. You'll get a reply in Teams, usually within 1 business day. Their answer will be saved so the next person gets it straight away.</p>
+    <div class="acts"><button class="btn" onclick="document.getElementById('q').focus()">Ask another question</button></div></div>`;
+  if(x.tier==="Low") return `<div class="card"><span class="badge Low">${LABEL.Low}</span><p class="ttl">I couldn't find a reliable answer</p>
+    <p class="ans">${esc(x.why)} I haven't generated a reply.</p>
+    ${x.searched.length?`<div class="slabel">What I searched</div><div class="chips">${x.searched.slice(0,3).map(d=>chip(d)).join("")}</div>`:""}
+    <div class="acts"><button class="btn primary" data-send="${i}">Send to ${esc(team(x))}</button></div>${why}</div>`;
+  const weak=x.cited.filter(isWeak);
+  const notice=x.tier==="Medium"?`<div class="notice"><b>${weak.some(d=>d.status==="Archived")?"This relies on an archived document":"This source is more than 12 months old"}</b><p>${weak.map(d=>`${d.id} was last updated ${fmt(d.updated)}`).join("; ")}. Confirm before using it in client work.</p></div>`:"";
+  return `<div class="card"><span class="badge ${x.tier}">${LABEL[x.tier]}</span>${notice}<p class="ans">${esc(x.answer)}</p>
+    <div class="slabel">Sources</div><div class="chips">${x.cited.map(d=>chip(d,x.quotes[d.id])).join("")}</div>
+    <div class="acts">${x.tier==="Medium"?`<button class="btn primary" data-send="${i}">Confirm with an expert</button>`:""}${fb}</div>${why}</div>`;
+}
+function openDoc(id,quote){
+  const d=BY_ID[id]; if(!d) return;
+  const q=(quote||"").trim();
+  const lines=d.body.split("\n").filter(l=>l.trim()).map(l=>{
+    let h=esc(l.replace(/^#+\s*/,"").replace(/^- \[ \] /,"☐ ").replace(/^- /,"• "));
+    const isHead=/^#+\s/.test(l);
+    if(q&&q.length>3){const e=esc(q);const k=h.toLowerCase().indexOf(e.toLowerCase());if(k>=0)h=h.slice(0,k)+"<mark>"+h.slice(k,k+e.length)+"</mark>"+h.slice(k+e.length);}
+    return isHead?`<p><b>${h}</b></p>`:`<p>${h}</p>`;
+  }).join("");
+  $("#panel").innerHTML=`<div class="phead"><div><h2>${esc(d.title)}</h2><div class="meta">${d.id} · ${esc(d.owner)} · Updated ${fmt(d.updated)} · ${d.status}</div>
+    ${isWeak(d)?`<span class="arch">${d.status==="Archived"?"Archived version":"Over 12 months old"}</span>`:""}</div>
+    <button class="x" aria-label="Close source" id="px">×</button></div><div class="pbody">${lines}</div>`;
+  $("#panel").classList.add("open"); $("#px").onclick=()=>$("#panel").classList.remove("open");
+  $("#panel").querySelector("mark")?.scrollIntoView({block:"center"});
+}
+
+async function ask(q){
+  q=q.trim(); if(!q) return;
+  $("#q").value="";
+  state.recent=[q,...state.recent.filter(r=>r!==q)].slice(0,8);
+  state.msgs.push({role:"user",text:q});
+  const slot={role:"assistant",pending:"Searching 30 documents…"}; state.msgs.push(slot); render();
+  const searched=retrieve(q,5);
+  slot.pending="Reading "+(searched.map(d=>d.id).join(", ")||"the knowledge base")+"…"; render();
+  try{
+    let r=matchBank(q);
+    if(!r && GEMINI_KEY && searched.length){ try{ r=await callGemini(prompt(q,searched)); }catch(_){ r=null; } }
+    if(!r){ await new Promise(ok=>setTimeout(ok,500)); r=extractive(q,searched); }
+    else if(!GEMINI_KEY||r.reason==="Built-in answer bank.") await new Promise(ok=>setTimeout(ok,600));
+    const quotes={}; const cited=[];
+    for(const c of (r.citations||[])){const d=BY_ID[c.doc_id]; if(d&&!cited.includes(d)){cited.push(d);quotes[d.id]=c.quote||"";}}
+    const [tier,why]=scoreTier(r,cited);
+    const srch=[...new Set([...cited,...searched])];
+    Object.assign(slot,{pending:null,tier,why,answer:tier==="Low"?"":r.answer,cited,quotes,searched:tier==="Low"&&!cited.length?searched:srch,flags:r});
+  }catch(e){
+    Object.assign(slot,{pending:null,error:e?.code==="bad_key"?"Gemini rejected the API key. Check it and try again.":e?.code==="rate_limited"?"Gemini rate limit reached. Wait a minute and try again.":"Something went wrong ("+(e?.message||e?.code||"error")+"). Try again."});
+  }
+  render();
+}
+
+$("#form").onsubmit=e=>{e.preventDefault();ask($("#q").value)};
+$("#q").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask($("#q").value)}});
+$("#newq").onclick=()=>{state.msgs=[];$("#panel").classList.remove("open");$("#side").classList.remove("open");render();$("#q").focus()};
+$("#menu").onclick=()=>$("#side").classList.toggle("open");
+keyBanner();
+render();
+</script>
+</body>
+</html>

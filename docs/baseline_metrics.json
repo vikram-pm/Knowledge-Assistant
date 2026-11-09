@@ -1,0 +1,188 @@
+{
+ "rows": [
+  [
+   "H01",
+   "High",
+   "High",
+   "P03 B07 P07 P05 P06",
+   "P03"
+  ],
+  [
+   "H02",
+   "High",
+   "Medium",
+   "T02 T01 B01 T04 T03",
+   "T02"
+  ],
+  [
+   "H03",
+   "High",
+   "High",
+   "P04",
+   "P04"
+  ],
+  [
+   "H04",
+   "High",
+   "High",
+   "P08 P09 P04 T03 B05",
+   "P08"
+  ],
+  [
+   "H05",
+   "High",
+   "High",
+   "B03 B02 P02 T04 P04",
+   "B03"
+  ],
+  [
+   "H06",
+   "High",
+   "High",
+   "P06 B08 P05 C03 B07",
+   "P06"
+  ],
+  [
+   "H07",
+   "High",
+   "High",
+   "B07 C05 P04 T04 P07",
+   "B07"
+  ],
+  [
+   "H08",
+   "High",
+   "High",
+   "B08 C03 B07 B03 T03",
+   "B08"
+  ],
+  [
+   "H09",
+   "High",
+   "High",
+   "T05 B04 T04 B02 P08",
+   "T05"
+  ],
+  [
+   "H10",
+   "High",
+   "High",
+   "B04 T04 B03 P08 B02",
+   "B04"
+  ],
+  [
+   "H11",
+   "High",
+   "High",
+   "C02 B05 C04 C06 B06",
+   "C02"
+  ],
+  [
+   "H12",
+   "High",
+   "High",
+   "C03 B05 P06 P10 P03",
+   "C03"
+  ],
+  [
+   "H13",
+   "High",
+   "High",
+   "B02 P07 B06 B05 P08",
+   "B02"
+  ],
+  [
+   "H14",
+   "High",
+   "High",
+   "B01 T02 T01 B03 C04",
+   "B01"
+  ],
+  [
+   "H15",
+   "High",
+   "High",
+   "P10 P02 P04 P05 P01",
+   "P10"
+  ],
+  [
+   "M01",
+   "Medium",
+   "Medium",
+   "P09 P08 T03 P04 B06",
+   "P09"
+  ],
+  [
+   "M02",
+   "Medium",
+   "Medium",
+   "B05 T03 B01 P09 T01",
+   "B05"
+  ],
+  [
+   "M03",
+   "Medium",
+   "High",
+   "T02 T01 B01 T03 C03",
+   "T01"
+  ],
+  [
+   "M04",
+   "Medium",
+   "Medium",
+   "C04 C06 P05 P06 P01",
+   "C04"
+  ],
+  [
+   "M05",
+   "Medium",
+   "Medium",
+   "B06 B08 C05 P10 P08",
+   "B06"
+  ],
+  [
+   "L01",
+   "Low",
+   "Low",
+   "P02 C06 P01 P05 C04",
+   "P02 P01"
+  ],
+  [
+   "L02",
+   "Low",
+   "Low",
+   "P01 P03 P06",
+   ""
+  ],
+  [
+   "L03",
+   "Low",
+   "High",
+   "C01 P04 C04 P08 P05",
+   "P04"
+  ],
+  [
+   "L04",
+   "Low",
+   "High",
+   "P03 P07 B08 C03 P06",
+   "P03"
+  ],
+  [
+   "L05",
+   "Low",
+   "Low",
+   "P02 P01 C06 B02 B08",
+   "P02 P01"
+  ]
+ ],
+ "out": {
+  "retrieval_hit_at5": 1,
+  "retN": 22,
+  "tier_accuracy": 0.84,
+  "escalation_precision": 1,
+  "escalation_recall": 0.6,
+  "citation_accuracy": 0.9,
+  "citeN": 20
+ }
+}

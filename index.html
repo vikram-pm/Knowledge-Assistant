@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agentic Knowledge Assistant · Case study · Vikram Seenivasan</title>
+<meta name="description" content="AI product case study: a RAG knowledge assistant that cites every answer and escalates when it isn't sure.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fbfaf7;--card:#ffffff;--ink:#14213d;--body:#2b3550;--mute:#6b7487;--line:#e4e2db;--accent:#2563eb;--accent-soft:#eaf0fe;--warm:#d9822b;
+--hi:#047857;--hi-bg:#e7f6ef;--md:#a35a0a;--md-bg:#fdf3e1;--lo:#b42318;--lo-bg:#fdecea;--wire:#eceae4;--wire2:#d9d6ce;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1118;--card:#161b25;--ink:#eef1f7;--body:#c9cfdb;--mute:#8d96a8;--line:#262d3a;--accent:#6b9bff;--accent-soft:#18233d;--warm:#f0a35b;
+--hi:#56d39b;--hi-bg:#12302a;--md:#f2b45c;--md-bg:#33260f;--lo:#ff8b80;--lo-bg:#3a1a17;--wire:#1d2330;--wire2:#2b3343;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1118;--card:#161b25;--ink:#eef1f7;--body:#c9cfdb;--mute:#8d96a8;--line:#262d3a;--accent:#6b9bff;--accent-soft:#18233d;--warm:#f0a35b;
+--hi:#56d39b;--hi-bg:#12302a;--md:#f2b45c;--md-bg:#33260f;--lo:#ff8b80;--lo-bg:#3a1a17;--wire:#1d2330;--wire2:#2b3343;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:calc(64px + env(safe-area-inset-top,0px));scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--body);font:17px/1.65 Inter,system-ui,sans-serif}
+h1,h2,h3{color:var(--ink);font-family:Fraunces,Georgia,serif;line-height:1.15;margin:0}
+h1{font-size:clamp(38px,6vw,64px)}h2{font-size:clamp(28px,3.6vw,40px);margin-bottom:14px}h3{font-size:21px;margin-bottom:6px}
+p{margin:0 0 14px}a{color:var(--accent)}
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav.top .in{max-width:1080px;margin:0 auto;padding:12px 24px;display:flex;gap:18px;align-items:center;overflow-x:auto;white-space:nowrap;font-size:14px}
+nav.top a{color:var(--mute);text-decoration:none}nav.top a:hover{color:var(--ink)}nav.top b{color:var(--ink);margin-right:8px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+section{padding:64px 0;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.12em;color:var(--warm);text-transform:uppercase;margin-bottom:10px}
+.lead{font-size:21px;color:var(--body);max-width:760px}
+.hero{padding:72px 0 56px}
+.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:36px}
+.meta div{border-top:2px solid var(--ink);padding-top:10px;font-size:15px}.meta b{display:block;color:var(--ink);font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.btn{display:inline-block;padding:12px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--ink);background:var(--card)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.grid{display:grid;gap:18px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.big{font-family:Fraunces,Georgia,serif;font-size:44px;font-weight:700;color:var(--ink);line-height:1}
+.small{font-size:14px;color:var(--mute)}
+.step{position:relative}.step .n{font-size:13px;font-weight:700;color:var(--accent)}
+.quote{font-family:Fraunces,Georgia,serif;font-size:20px;color:var(--accent);margin:8px 0 12px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;font-size:15px}.kv b{color:var(--ink)}
+.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--ink);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.pain{background:var(--lo-bg)}.opp{background:var(--hi-bg)}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px}
+.High{color:var(--hi);background:var(--hi-bg)}.Medium{color:var(--md);background:var(--md-bg)}.Low{color:var(--lo);background:var(--lo-bg)}
+.mermaid{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:0;overflow-x:auto;text-align:center}
+/* wireframes */
+.wf{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:11px}
+.wf .bar{background:var(--wire);padding:6px 10px;font-weight:600;color:var(--ink)}
+.wf .body{display:flex;min-height:210px}.wf .sb{width:22%;background:var(--wire);padding:8px;display:flex;flex-direction:column;gap:6px}
+.wf .sb i,.wf .ln{display:block;height:7px;border-radius:4px;background:var(--wire2)}
+.wf .main{flex:1;padding:10px;display:flex;flex-direction:column;gap:8px}
+.wf .u{align-self:flex-end;width:60%;height:18px;border-radius:6px;background:var(--accent);opacity:.75}
+.wf .a{border:1px dashed var(--wire2);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.wf .note{border-radius:5px;padding:4px 6px;font-size:10px}
+.wf .src{height:14px;border:1px solid var(--wire2);border-radius:4px}
+.wf .bt{display:inline-block;height:14px;width:50%;border-radius:4px;background:var(--accent);opacity:.8}
+.wf .pn{width:30%;border-left:1px solid var(--line);padding:8px;display:flex;flex-direction:column;gap:5px}
+.wf .hl{height:9px;border-radius:3px;background:#f5d76e}
+.wf figcaption{padding:8px 10px;color:var(--mute);border-top:1px solid var(--line)}
+.fig{margin:22px 0 0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}.fig img{display:block;width:100%;height:auto}.fig figcaption{padding:10px 16px;font-size:14px;color:#6b7487;background:#fff;border-top:1px solid #e4e2db}
+.demo{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line);background:#14213d;margin-top:18px}
+iframe{width:100%;height:640px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+pre.code{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;font-size:13.5px;line-height:1.5}
+.bar-row{display:grid;grid-template-columns:180px 1fr 60px;gap:12px;align-items:center;font-size:15px;margin:8px 0}
+.bar-row .tr{height:12px;background:var(--wire);border-radius:6px;position:relative}
+.bar-row .fl{height:100%;border-radius:6px;background:var(--accent)}
+.bar-row .tg{position:absolute;top:-4px;width:2px;height:20px;background:var(--ink)}
+footer{padding:40px 0 60px;color:var(--mute);font-size:14px}
+@media (max-width:820px){.g2,.g3,.g4,.g5,.meta{grid-template-columns:1fr}.bar-row{grid-template-columns:120px 1fr 48px}iframe{height:560px}}
+</style>
+</head>
+<body>
+<nav class="top" aria-label="Sections"><div class="in"><b>Knowledge Assistant</b>
+<a href="#process">Process</a><a href="#problem">Problem</a><a href="#personas">Personas</a><a href="#research">UX interviews</a><a href="#flow">Flow</a><a href="#wireframes">Wireframes</a><a href="#prototype">Demo</a><a href="#build">Development</a><a href="#metrics">AI metrics</a><a href="#roi">ROI</a></div></nav>
+
+<header class="hero"><div class="wrap">
+<div class="eyebrow">AI product case study · Concept project · Cognizant Canada</div>
+<h1>An AI assistant that cites every answer, and knows when to ask an expert</h1>
+<p class="lead" style="margin-top:20px">Consultants spent about 25 minutes finding one internal answer and often ended up interrupting a senior colleague. I defined, designed and built a retrieval-augmented assistant that answers from approved documents, shows its sources, and routes risky questions to people.</p>
+<div class="cta"><a class="btn primary" href="prototype/">Try the live prototype →</a><a class="btn" href="#prototype">▶ Watch the demo</a><a class="btn" href="#metrics">See the AI metrics</a><a class="btn" href="https://github.com/vikram-pm/Knowledge-Assistant">View the code</a></div>
+<div class="meta">
+<div><b>Role</b>AI Product Manager, end to end: research, PRD, UX, prototype, evaluation</div>
+<div><b>Timeline</b>2-week sprint</div>
+<div><b>Stack</b>Gemini API (File Search) · Langflow · Figma · Python</div>
+<div><b>Outcome</b>43 s to a verified answer in testing, vs 25 min today</div>
+</div></div></header>
+
+<section id="process"><div class="wrap">
+<div class="eyebrow">01 · Process</div><h2>Five steps, one deliverable each</h2>
+<div class="grid g5" style="margin-top:22px">
+<div class="card step"><div class="n">STEP 1</div><h3>Discover</h3><p class="small">5 interviews, personas, journey map</p></div>
+<div class="card step"><div class="n">STEP 2</div><h3>Define</h3><p class="small">PRD, confidence tiers, 30-doc corpus, 25-question test set</p></div>
+<div class="card step"><div class="n">STEP 3</div><h3>Build</h3><p class="small">Gemini File Search pipeline and tier rules</p></div>
+<div class="card step"><div class="n">STEP 4</div><h3>Design</h3><p class="small">Figma flows, wireframes, components, live prototype</p></div>
+<div class="card step"><div class="n">STEP 5</div><h3>Validate</h3><p class="small">AI evaluation, 3 usability sessions, ROI model</p></div>
+</div></div></section>
+
+<section id="problem"><div class="wrap">
+<div class="eyebrow">02 · Problem</div><h2>Finding one answer takes 25 minutes, and the expert pays for it</h2>
+<p class="lead">Answers are spread across SharePoint, Confluence, policy PDFs and people's heads. Old and current versions sit side by side, so people can't tell what's authoritative and fall back on messaging a senior colleague.</p>
+<div class="grid g3" style="margin-top:22px">
+<div class="card"><div class="big">~8 min</div><p class="small">Searching: 40+ hits, old and current versions mixed</p></div>
+<div class="card"><div class="big">~7 min</div><p class="small">Verifying: no way to tell which document is authoritative</p></div>
+<div class="card"><div class="big" style="color:var(--warm)">~10 min</div><p class="small">Waiting on an expert: managers field 5–6 questions a day</p></div>
+</div>
+<div class="card" style="margin-top:18px"><b style="color:var(--ink)">Problem statement.</b> Consultants and delivery managers need a fast, trustworthy way to answer delivery questions from approved sources, without guessing on compliance or interrupting experts for routine lookups.</div>
+</div></section>
+
+<section id="personas"><div class="wrap">
+<div class="eyebrow">03 · Personas</div><h2>One wants speed, the other wants safety</h2>
+<div class="grid g2" style="margin-top:22px">
+<div class="card"><h3>Priya · Consultant</h3><p class="small">Senior consultant, Toronto banking account</p><p class="quote">"Which version of this template is the current one?"</p>
+<div class="kv"><b>Lookups</b><span>8–12 a day, mostly low stakes</span><b>Needs</b><span>Speed and a link to the source</span><b>Trusts when</b><span>The answer matches what she finds when she clicks through</span></div></div>
+<div class="card"><h3>Marc · Delivery Manager</h3><p class="small">Runs 4 projects across Ontario and Québec</p><p class="quote">"What did we commit to on data residency for this client?"</p>
+<div class="kv"><b>Lookups</b><span>3–5 a day, high stakes</span><b>Needs</b><span>Citations, confidence, a path to a human</span><b>Trusts when</b><span>The tool says "I don't know" instead of guessing</span></div></div>
+</div></div></section>
+
+<section id="research"><div class="wrap">
+<div class="eyebrow">04 · UX interviews</div><h2>What five interviews told us</h2>
+<p>Composite interviews built from delivery experience: 3 consultants and 2 delivery managers, 30 minutes each, each walking through their most recent real lookup step by step.</p>
+<div class="tbl"><table><thead><tr><th>Stage</th><th>Doing</th><th>Pain point</th><th>Opportunity</th></tr></thead><tbody>
+<tr><td><b>Search</b> ~8 min</td><td>Keyword search across SharePoint and Confluence</td><td class="pain">40+ hits; old and current versions mixed</td><td class="opp">Ask in plain language, get one answer</td></tr>
+<tr><td><b>Verify</b> ~7 min</td><td>Open and skim 3–5 documents</td><td class="pain">No way to tell which is authoritative</td><td class="opp">Show source, date and confidence</td></tr>
+<tr><td><b>Ask</b> ~10 min</td><td>Message a senior colleague on Teams</td><td class="pain">Answer isn't recorded anywhere</td><td class="opp">Escalate only when unsure, with context</td></tr>
+<tr><td><b>Use</b></td><td>Paste the answer into client work</td><td class="pain">No citation kept</td><td class="opp">Log every answer with its sources</td></tr>
+</tbody></table></div>
+<div class="grid g3" style="margin-top:18px">
+<div class="card"><h3>Trust comes from sources</h3><p class="small">All 5 named a source link, a date, or "I don't know" as the condition for trusting a tool.</p></div>
+<div class="card"><h3>Experts are the hidden cost</h3><p class="small">4 of 5 regularly end a lookup by asking a colleague. One manager fields 5–6 such questions a day.</p></div>
+<div class="card"><h3>Stakes differ by role</h3><p class="small">Consultants want short answers. Managers won't accept a guess on anything contractual.</p></div>
+</div></div></section>
+
+<section id="flow"><div class="wrap">
+<div class="eyebrow">05 · Flow</div><h2>Three paths, decided by rules the business can audit</h2>
+<p>The confidence tier isn't the model's opinion of itself, which tends to be overconfident. It comes from things we can check: how old the source is, whether it's archived, whether sources agree, and whether the question is legal.</p>
+<figure class="fig"><img src="images/flow.png" width="1600" height="540" alt="Flowchart: question, retrieve, LLM drafts, then two rule checks lead to High confidence, Check before using, or Needs an expert, where an expert replies and the answer is saved"><figcaption>Designed in Figma. Two rule checks decide the path; the model only drafts.</figcaption></figure>
+</div></section>
+
+<section id="wireframes"><div class="wrap">
+<div class="eyebrow">06 · Wireframes and usability</div><h2>Four screens, two fixes from testing</h2>
+<figure class="fig"><img src="images/wireframes.png" width="1600" height="990" loading="lazy" alt="Wireframes of four chat states: High confidence with highlighted source, Check before using with an age warning, Needs an expert showing conflicting sources, and Sent to expert confirmation"><figcaption>Designed in Figma: the four states the assistant can be in.</figcaption></figure>
+<div class="tbl" style="margin-top:24px"><table><thead><tr><th>Usability finding (3 sessions)</th><th>Change</th></tr></thead><tbody>
+<tr><td>1 of 3 participants skipped the age warning and used an outdated figure</td><td>Moved the warning above the answer and named the source date</td></tr>
+<tr><td>"Low confidence" read as "the tool is broken"</td><td>Renamed the state to "Needs an expert" and led with what happens next</td></tr>
+<tr><td>All 3 found the highlighted source line unaided; the handoff built trust for compliance questions</td><td>Kept as designed</td></tr>
+</tbody></table></div>
+<p class="small" style="margin-top:12px">Task completion: 8 of 9. Average time to a verified answer: 43 seconds.</p>
+</div></section>
+
+<section id="prototype"><div class="wrap">
+<div class="eyebrow">07 · Product demo and live prototype</div><h2>See it in about a minute, then try it</h2>
+<p>The demo walks through all three trust paths: a cited answer from a current policy, a warning on an outdated source, and an escalation when documents conflict.</p>
+<video class="demo" controls preload="metadata" playsinline poster="media/demo-poster.jpg" width="1280" height="800" aria-label="Product demo of the Knowledge Assistant">
+<source src="media/demo.mp4" type="video/mp4">
+Your browser can't play this video. <a href="media/demo.mp4">Download the demo (MP4)</a>.
+</video>
+<h3 style="margin-top:36px">Try the live prototype</h3>
+<p>Start with the suggested questions: one for each path. Click any source to open the document with the supporting line highlighted, and open "Why this rating?" to see the reasoning.</p>
+<iframe src="prototype/" title="Knowledge Assistant live prototype" loading="lazy"></iframe>
+<p class="small" style="margin-top:10px"><a href="prototype/">Open full screen →</a> The hosted version runs entirely in the browser on a 30-document sample knowledge base, with no API key needed.</p>
+</div></section>
+
+<section id="build"><div class="wrap">
+<div class="eyebrow">08 · Development flow and method</div><h2>Managed retrieval, rule-based trust</h2>
+<pre class="mermaid">
+flowchart LR
+  D[(30 documents + metadata: status, last updated)] --> FS[Gemini File Search store]
+  U([User question]) --> FS
+  FS --> LLM[Gemini: answer + citations + flags as JSON]
+  LLM --> T[score_tier rules in Python]
+  T --> UI[Chat UI: tier badge, sources, escalation]
+  T --> LOG[(Audit log: query, sources, tier)]
+</pre>
+<div class="grid g3" style="margin-top:18px">
+<div class="card"><h3>Retrieval</h3><p class="small">Gemini File Search handles chunking, embeddings and citations. Each document carries its status and last-updated date as metadata, returned with every citation.</p></div>
+<div class="card"><h3>Generation</h3><p class="small">The model answers only from retrieved text and returns structured JSON: answer, answerable, sources conflict, legal or regulatory, and a reason.</p></div>
+<div class="card"><h3>Trust rules</h3><p class="small">About 20 lines of code turn those signals into a tier. A compliance reviewer can read and audit them, unlike a model's self-reported confidence.</p></div>
+</div>
+<pre class="code" style="margin-top:18px">def score_tier(result, citations):
+    if not result["answerable"]:        return "Low",    "No reliable answer"
+    if result["sources_conflict"]:      return "Low",    "Sources disagree"
+    if result["legal_or_regulatory"]:   return "Low",    "Expert must confirm"
+    if not citations:                   return "Low",    "Uncited answer withheld"
+    if any(archived_or_stale(c) for c in citations):
+                                        return "Medium", "Old or archived source"
+    return "High", "Current sources"</pre>
+<p class="small">Method: discovery → PRD with acceptance criteria → test set written <i>before</i> building → pipeline → design → evaluate → iterate. Tools: Gemini API, Langflow (visual pipeline), Figma and FigJam, Python. <a href="https://github.com/vikram-pm/Knowledge-Assistant/tree/main/pipeline">Pipeline code →</a></p>
+</div></section>
+
+<section id="metrics"><div class="wrap">
+<div class="eyebrow">09 · AI usage metrics and success rate</div><h2>Measured on a 25-question test set with planted traps</h2>
+<p>The test set mixes 15 answerable questions, 5 that only an outdated source answers, and 5 with no safe answer (two of them hit conflicting documents). Below are measured results for the keyword-retrieval baseline, against the targets the LLM pipeline must hit.</p>
+<div class="card" style="margin-top:18px">
+<div class="bar-row"><b>Retrieval hit rate</b><div class="tr"><div class="fl" style="width:100%"></div><span class="tg" style="left:95%"></span></div><span>100%</span></div>
+<div class="bar-row"><b>Citation accuracy</b><div class="tr"><div class="fl" style="width:90%"></div><span class="tg" style="left:95%"></span></div><span>90%</span></div>
+<div class="bar-row"><b>Tier accuracy</b><div class="tr"><div class="fl" style="width:84%"></div><span class="tg" style="left:80%"></span></div><span>84%</span></div>
+<div class="bar-row"><b>Escalation precision</b><div class="tr"><div class="fl" style="width:100%"></div><span class="tg" style="left:90%"></span></div><span>100%</span></div>
+<div class="bar-row"><b>Escalation recall</b><div class="tr"><div class="fl" style="width:60%;background:var(--warm)"></div><span class="tg" style="left:100%"></span></div><span>60%</span></div>
+<p class="small" style="margin:10px 0 0">Bars: measured baseline. Black marks: target. Retrieval 22/22, citations 18/20, tiers 21/25, escalations 3/3 correct but only 3 of 5 caught.</p>
+</div>
+<div class="grid g2" style="margin-top:18px">
+<div class="card"><h3>What failed, and why it matters</h3><p class="small">The baseline answered two questions it should have escalated (a billing rate and meeting-room booking) by matching loosely related lines. Confident wrong answers are the most damaging failure for trust. That's the case for an LLM step that can judge whether the text actually answers the question.</p></div>
+<div class="card"><h3>Targets for the Gemini pipeline</h3><p class="small">Answer relevance ≥ 85% · hallucination ≤ 3% of claims · citation accuracy ≥ 95% · escalation precision ≥ 90% and recall 100% · time to answer −40%. Scored by hand with <a href="https://github.com/vikram-pm/Knowledge-Assistant/blob/main/pipeline/run_eval.py">run_eval.py</a> and the scorecard workbook.</p></div>
+</div></div></section>
+
+<section id="roi"><div class="wrap">
+<div class="eyebrow">10 · ROI</div><h2>Pays back in about two months in the base case</h2>
+<div class="tbl"><table><thead><tr><th></th><th>Low</th><th>Base</th><th>High</th></tr></thead><tbody>
+<tr><td>Users</td><td>100</td><td>200</td><td>400</td></tr>
+<tr><td>Hard lookups per user per day</td><td>1</td><td>2</td><td>3</td></tr>
+<tr><td>Minutes saved per lookup</td><td>5</td><td>10</td><td>12</td></tr>
+<tr><td>Expert interruptions avoided (per manager per day)</td><td>1 × 10 managers</td><td>3 × 20 managers</td><td>4 × 40 managers</td></tr>
+<tr><td><b>Hours saved per year</b></td><td>2,200</td><td>16,900</td><td>58,700</td></tr>
+<tr><td><b>Annual value (CAD)</b></td><td>$196K</td><td>$1.49M</td><td>$5.13M</td></tr>
+<tr><td><b>Year-1 return on $245K cost</b></td><td>−20% (payback ~15 months)</td><td>5.1× (payback ~2 months)</td><td>20× (under 1 month)</td></tr>
+</tbody></table></div>
+<p class="small" style="margin-top:12px">Assumptions: 220 working days; blended internal cost $85/h for consultants and $110/h for managers; each avoided interruption saves 10 manager-minutes. Year-1 cost of $245K covers build, content operations and API usage (Gemini costs are under 2% of it). The low case shows adoption is the real risk, which is why the pilot measures usage before scaling.</p>
+</div></section>
+
+<section><div class="wrap">
+<div class="eyebrow">11 · Learnings</div><h2>What I'd tell the next team</h2>
+<div class="grid g3" style="margin-top:18px">
+<div class="card"><h3>Write the test set first</h3><p class="small">Planting outdated and conflicting documents up front made "trust" measurable before any UI existed.</p></div>
+<div class="card"><h3>Escalation is a feature</h3><p class="small">The handoff, not the answer quality, was what made the manager persona willing to use it for compliance questions.</p></div>
+<div class="card"><h3>Keep trust logic out of the model</h3><p class="small">Rules on source age and agreement are explainable, testable and easy to change when policy changes.</p></div>
+</div></div></section>
+
+<footer><div class="wrap">Vikram Seenivasan · AI Product Manager portfolio · Concept project using a simulated document set. <a href="https://github.com/vikram-pm/Knowledge-Assistant">GitHub</a></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+const dark=matchMedia("(prefers-color-scheme: dark)").matches&&document.documentElement.dataset.theme!=="light"||document.documentElement.dataset.theme==="dark";
+mermaid.initialize({startOnLoad:true,theme:dark?"dark":"neutral",flowchart:{curve:"basis"},fontFamily:"Inter, sans-serif"});
+</script>
+</body>
+</html>
