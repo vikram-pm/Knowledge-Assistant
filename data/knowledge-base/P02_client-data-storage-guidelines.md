@@ -10,7 +10,7 @@ Status: Current
 Guidance on where project data may be stored.
 
 ## Guidelines
-- Client data may be stored in any approved Cognizant cloud region in North America, including US regions, to optimise cost.
+- Client data may be stored in any approved company cloud region in North America, including US regions, to optimise cost.
 - Test environments may use copies of production data if access is restricted to the project team.
 - Offshore teams may access client data once they complete security training.
 

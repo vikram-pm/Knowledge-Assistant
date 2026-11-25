@@ -1,6 +1,6 @@
 # Agentic Knowledge Assistant: AI product case study
 
-A retrieval-augmented assistant that answers delivery questions from approved documents, cites every answer, and routes risky questions to an expert. Concept project for Cognizant Canada, built end to end as an AI Product Manager.
+A retrieval-augmented assistant that answers delivery questions from approved documents, cites every answer, and routes risky questions to an expert. Concept project for a fictional Canadian consulting firm (synthetic data), built end to end as an AI Product Manager.
 
 **Case study:** https://vikram-pm.github.io/Knowledge-Assistant/
 **Live prototype:** https://vikram-pm.github.io/Knowledge-Assistant/prototype/
